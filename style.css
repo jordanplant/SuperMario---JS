@@ -1,0 +1,8 @@
+:root {
+  --BlueSky: #00bbff;
+  
+}
+
+.gameCanvas {
+  background: var(--BlueSky);
+}
