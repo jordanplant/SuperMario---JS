@@ -3,9 +3,9 @@ const ctx = canvas.getContext('2d');
 
 // Load the sprite sheet
 const spriteSheet = new Image();
-spriteSheet.src = 'tiles.png'; 
+spriteSheet.src = '/tiles.png'; 
 const characterSheet = new Image();
-characterSheet.src = 'characters.gif'; 
+characterSheet.src = '/characters.gif'; 
 
 // Define the coordinates and dimensions of the portion of the sprite sheet you want to access
 const sourceX = 0; 
