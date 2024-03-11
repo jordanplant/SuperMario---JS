@@ -70,57 +70,76 @@ function drawClouds() {
 
 // Function to draw a brick
 function drawPlainBrick(x, y) {
-    // Original size of the brick from the sprite sheet
-    const brickOriginalWidth = 16;
-    const brickOriginalHeight = 16; 
-    
-    // Scale factor
-    const scale = 2; 
-    
-    // Calculate scaled dimensions
-    const brickWidth = brickOriginalWidth * scale; 
-    const brickHeight = brickOriginalHeight * scale; 
-    
-    // Source position of the brick in the sprite sheet
-    const brickSourceX = 32;
-    const brickSourceY = 0; 
-    
-    // Draw the brick
-    ctx.drawImage(spriteSheet, brickSourceX, brickSourceY, brickOriginalWidth, brickOriginalHeight, x, y, brickWidth, brickHeight);
+  // Original size of the brick from the sprite sheet
+  const brickOriginalWidth = 16;
+  const brickOriginalHeight = 16; 
+  
+  // Scale factor
+  const scale = 2; 
+  
+  // Calculate scaled dimensions
+  const brickWidth = brickOriginalWidth * scale; 
+  const brickHeight = brickOriginalHeight * scale; 
+  
+  // Source position of the brick in the sprite sheet
+  const brickSourceX = 32;
+  const brickSourceY = 0; 
+  
+  // Draw the brick
+  ctx.drawImage(spriteSheet, brickSourceX, brickSourceY, brickOriginalWidth, brickOriginalHeight, x, y, brickWidth, brickHeight);
+
+  // Return the rectangle representing the brick for collision detection
+  return {
+      x: x,
+      y: y,
+      width: brickWidth,
+      height: brickHeight
+  };
 }
 
 // Function to draw a question mark
 function drawQuestion(x, y) {
-    // Original size of the question mark from the sprite sheet
-    const questionOriginalWidth = 16;
-    const questionOriginalHeight = 16; 
-    
-    // Scale factor
-    const scale = 2;
-    
-    // Calculate scaled dimensions
-    const questionWidth = questionOriginalWidth * scale; 
-    const questionHeight = questionOriginalHeight * scale; 
-    
-    // Source position of the question mark in the sprite sheet
-    const questionSourceX = 384;
-    const questionSourceY = 0; 
-    
-    // Draw the question mark
-    ctx.drawImage(spriteSheet, questionSourceX, questionSourceY, questionOriginalWidth, questionOriginalHeight, x, y, questionWidth, questionHeight);
+  // Original size of the question mark from the sprite sheet
+  const questionOriginalWidth = 16;
+  const questionOriginalHeight = 16; 
+  
+  // Scale factor
+  const scale = 2;
+  
+  // Calculate scaled dimensions
+  const questionWidth = questionOriginalWidth * scale; 
+  const questionHeight = questionOriginalHeight * scale; 
+  
+  // Source position of the question mark in the sprite sheet
+  const questionSourceX = 384;
+  const questionSourceY = 0; 
+  
+  // Draw the question mark
+  ctx.drawImage(spriteSheet, questionSourceX, questionSourceY, questionOriginalWidth, questionOriginalHeight, x, y, questionWidth, questionHeight);
+
+  // Return the rectangle representing the question mark for collision detection
+  return {
+      x: x,
+      y: y,
+      width: questionWidth,
+      height: questionHeight
+  };
 }
 
-//NEED TO ADD A FUNCTION TO REPLACE THE QUESTION MARK WITH A PLAIN BOX IF ACTIVATED
 
 // Function to draw bricks, question mark, and bricks
 function drawBricks() {
+  // Array to store rectangles representing bricks and question marks for collision detection
+  const bricksRects = [];
 
-    drawPlainBrick(200, 200);
+  // Draw bricks and question marks and store their rectangles
+  bricksRects.push(drawPlainBrick(200, 200));
+  bricksRects.push(drawQuestion(232, 200));
+  bricksRects.push(drawPlainBrick(264, 200));
+  bricksRects.push(drawPlainBrick(296, 200));
 
-    drawQuestion(232, 200);
-    
-    drawPlainBrick(264, 200);
-    drawPlainBrick(296, 200);
+  // Return the array of rectangles for collision detection
+  return bricksRects;
 }
 
 // Function to draw a coin
@@ -156,12 +175,21 @@ const frameWidth = 18;
 const frameHeight = 34; 
 
 // Define the starting X coordinate of the frame for facing right and left
-
 const frameXRight = 256;
 const frameXLeft = 238; 
 
 const frameJumpRight = 368; 
 const frameJumpLeft = 128; 
+
+// Function to check collision between two rectangles
+function isColliding(rect1, rect2) {
+  return rect1.x < rect2.x + rect2.width &&
+         rect1.x + rect1.width > rect2.x &&
+         rect1.y < rect2.y + rect2.height &&
+         rect1.y + rect1.height > rect2.y;
+}
+
+
 // Function to draw the character at a static position
 function drawStaticCharacter(x, y, isFacingRight, isJumping) {
   let frameX;
@@ -196,24 +224,52 @@ const groundLevel = canvas.height - destHeight - 130;
 let isJumping = false;
 let jumpStartY = 0;
 
-// Function to handle keyboard events
+// Object to track the state of arrow keys
+const keysPressed = {
+  ArrowLeft: false,
+  ArrowRight: false,
+  ArrowUp: false
+};
+
+// Function to handle keydown event
 function handleKeyDown(event) {
-  switch (event.key) {
-      case 'ArrowLeft':
-          characterX -= 10; 
-          isFacingRight = false; 
-          break;
-      case 'ArrowRight':
-          characterX += 10; 
-          isFacingRight = true; 
-          break;
-      case 'ArrowUp':
-          if (!isJumping) {
-              startJump(); 
-          }
-          break;
+  // Update keysPressed object based on the pressed key
+  if (event.key in keysPressed) {
+    keysPressed[event.key] = true;
   }
 }
+
+// Function to handle keyup event
+function handleKeyUp(event) {
+  // Update keysPressed object when key is released
+  if (event.key in keysPressed) {
+    keysPressed[event.key] = false;
+  }
+}
+
+// Function to update character position based on keys pressed
+function updateCharacterPosition() {
+  // Check for combined movement
+  if (keysPressed.ArrowLeft) {
+    characterX -= 10;
+    isFacingRight = false;
+  }
+  if (keysPressed.ArrowRight) {
+    characterX += 10;
+    isFacingRight = true;
+  }
+  if (keysPressed.ArrowUp && !isJumping) {
+    startJump();
+  }
+}
+
+// Add event listeners for keydown and keyup events
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+
+// Update character position continuously
+setInterval(updateCharacterPosition, 1000 / 30); // Update approximately 30 times per second
+
 
 // Function to start the jump
 function startJump() {
@@ -222,22 +278,66 @@ function startJump() {
 }
 
 // Function to update the character's position during the jump
-function updateJump() {
+function updateJump(bricksRects) {
   if (isJumping) {
-      characterY -= jumpSpeed;
-      if (characterY <= jumpStartY - jumpHeight) {
-          // Reached the peak of the jump
-          isJumping = false;
-          jumpFrame = 0; // Reset jump frame when jump ends
-      }
+    characterY -= jumpSpeed;
+    if (characterY <= jumpStartY - jumpHeight) {
+      // Reached the peak of the jump
+      isJumping = false;
+      jumpFrame = 0; // Reset jump frame when jump ends
+    }
   } else if (characterY < groundLevel) {
-      // Simulate falling back to the ground
-      characterY += jumpSpeed;
-      if (characterY >= groundLevel) {
-          characterY = groundLevel; // Ensure character is at ground level
+    // Simulate falling back to the ground
+    characterY += jumpSpeed;
+    if (characterY >= groundLevel) {
+      characterY = groundLevel; // Ensure character is at ground level
+    }
+  }
+
+  // Define rectangle for Mario
+  const characterRect = {
+    x: characterX,
+    y: characterY,
+    width: frameWidth * 2,
+    height: frameHeight * 2
+  };
+
+  // Check collision with each brick
+  let isCollidingWithBrick = false;
+  for (let i = 0; i < bricksRects.length; i++) {
+    if (isColliding(characterRect, bricksRects[i])) {
+      if (
+        // Check if character is coming from the side
+        characterY + characterRect.height <= bricksRects[i].y || // Character is above the brick
+        characterX + characterRect.width <= bricksRects[i].x || // Character is to the left of the brick
+        characterX >= bricksRects[i].x + bricksRects[i].width // Character is to the right of the brick
+      ) {
+        // Allow the character to pass through the brick
+        continue;
+      } else if (characterY < bricksRects[i].y && !isJumping) {
+        // If collision detected and not coming from the side and not jumping, set character's Y position to the top of the brick
+        characterY = bricksRects[i].y - characterRect.height;
+        isCollidingWithBrick = true;
+      } else {
+        // If collision detected from above or character is jumping, end the jump cycle and return to the ground
+        characterY = bricksRects[i].y + bricksRects[i].height;
+        isJumping = false; // End the jump
+        jumpFrame = 0; // Reset jump frame
+        break; // Exit the loop since the jump cycle ends
       }
+    }
+  }
+
+  // If no collision with bricks and character is not jumping (i.e., not in mid-air)
+  if (!isCollidingWithBrick && !isJumping && characterY + (frameHeight * 2) < groundLevel) {
+    characterY += jumpSpeed;
   }
 }
+
+
+
+
+
 
 // Add event listener to listen for keydown events
 document.addEventListener('keydown', handleKeyDown);
@@ -250,11 +350,11 @@ function updateGame() {
   // Draw the floor, clouds, bricks, and coins
   drawFloor();
   drawClouds();
-  drawBricks();
+  const bricksRects = drawBricks(); // Draw bricks and get their rectangles for collision detection
   drawCoins();
 
   // Update character position during jump
-  updateJump();
+  updateJump(bricksRects);
 
   // Draw the character at the static position
   drawStaticCharacter(characterX, characterY, isFacingRight, isJumping);
@@ -265,3 +365,4 @@ function updateGame() {
 
 // Start the game loop
 updateGame();
+

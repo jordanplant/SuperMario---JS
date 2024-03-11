@@ -10,6 +10,9 @@ This project is a recreation of a classic Mario scene using HTML5 Canvas and Jav
 - Implements character animation cycle for walking and jumping.
 - Supports basic keyboard controls for movement (left, right, and jump).
 
+## Updates
+- **V1.1** Implemented collision handling for floating bricks, enabling Mario to jump and land on surfaces properly. If obstructed while jumping, Mario now bounces back to the ground.
+
 <!-- ## How to Play
 1. Clone the repository to your local machine.
 2. Open the `index.html` file in your web browser.

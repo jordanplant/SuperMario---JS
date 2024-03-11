@@ -1,17 +1,32 @@
 :root {
   --BlueSky: #00bbff;
+  font-family: sans-serif;
   
 }
 
 body {
-display: block;
+  max-width: 768px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+
 }
 
 .gameCanvas {
   background: var(--BlueSky);
 }
 
+.instructions {
+  text-align: center;
+}
+
 i {
 
   fill: #000;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
